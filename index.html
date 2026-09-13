@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>오늘네컷 · SchoolKit</title>
+
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { theme: { extend: {
+    fontFamily: { sans: ['Pretendard Variable','Pretendard','sans-serif'] },
+    colors: { mint:{50:'#ECFDF5',100:'#D1FAE5',300:'#6EE7B7',500:'#10B981',600:'#059669',700:'#047857'} }
+  }}}
+</script>
+<style>
+  body{background:#F8FAFC;font-family:'Pretendard Variable',Pretendard,sans-serif;-webkit-tap-highlight-color:transparent;color:#0F172A}
+  .btn{transition:all .2s ease}
+  .btn:active{transform:scale(.96)}
+  .flash{animation:fa .45s ease-out}
+  @keyframes fa{0%{opacity:.95}100%{opacity:0}}
+  .pop{animation:pa .55s cubic-bezier(.2,.9,.3,1)}
+  @keyframes pa{0%{transform:scale(.4);opacity:0}45%{transform:scale(1.12);opacity:1}100%{transform:scale(1);opacity:1}}
+  .fade{animation:fi .35s ease-out}
+  @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  #video{transform-origin:center}
+  .mirrored{transform:scaleX(-1)}
+  /* 세그먼트 컨트롤 */
+  .seg{background:#F1F5F9;border-radius:14px;padding:4px;display:flex;gap:2px}
+  .seg button{flex:1;padding:9px 0;border-radius:10px;font-size:13px;font-weight:700;color:#64748B;transition:all .18s ease}
+  .seg button.on{background:#fff;color:#047857;box-shadow:0 1px 3px rgba(15,23,42,.10)}
+  /* 색상 원 */
+  .swatch{width:34px;height:34px;border-radius:999px;transition:all .2s ease;box-shadow:inset 0 0 0 1px rgba(15,23,42,.08)}
+  .swatch.on{box-shadow:inset 0 0 0 1px rgba(15,23,42,.08),0 0 0 3px #fff,0 0 0 5px #10B981}
+  /* 필터 칩 */
+  .lchip{padding:9px 0;border-radius:12px;font-size:13px;font-weight:700;color:#64748B;background:#F1F5F9;text-align:center;transition:all .2s ease}
+  .lchip.on{background:#0F172A;color:#fff}
+  .noscroll::-webkit-scrollbar{display:none}
+  .noscroll{-ms-overflow-style:none;scrollbar-width:none}
+
+  #printArea{display:none}
+  @media print{
+    @page{size:100mm 148mm;margin:0}
+    html,body{margin:0!important;padding:0!important;background:#fff!important}
+    body > *:not(#printArea){display:none!important}
+    #printArea{display:block!important}
+    #printImg{width:100mm;height:148mm;display:block}
+  }
+</style>
+</head>
+<body class="min-h-screen pb-12">
+
+<!-- ========== Header ========== -->
+<header class="bg-gradient-to-br from-mint-700 via-mint-600 to-mint-500 px-5 pt-7 pb-12 text-center">
+  <span class="inline-block bg-white text-mint-700 font-bold text-[11px] tracking-wide px-3.5 py-1 rounded-full">SchoolKit</span>
+  <h1 class="text-white font-extrabold text-[28px] sm:text-[34px] mt-3 tracking-tight">오늘네컷</h1>
+  <p class="text-mint-50/80 text-[11px] font-bold mt-1.5" style="letter-spacing:.28em">TODAY 4 CUTS</p>
+</header>
+
+<!-- ========== 사용 순서 ========== -->
+<div class="px-4 -mt-6">
+  <div class="max-w-5xl mx-auto bg-white shadow-sm rounded-2xl px-4 py-3.5">
+    <div class="flex items-center justify-between gap-1.5 overflow-x-auto noscroll">
+      <div class="flex items-center gap-2 shrink-0">
+        <span class="w-[22px] h-[22px] rounded-full bg-slate-100 text-slate-500 text-[11px] font-extrabold grid place-items-center">1</span>
+        <span class="text-[13px] font-bold text-slate-600 whitespace-nowrap">카메라 켜기</span>
+      </div>
+      <span class="h-px flex-1 bg-slate-200 min-w-[12px]"></span>
+      <div class="flex items-center gap-2 shrink-0">
+        <span class="w-[22px] h-[22px] rounded-full bg-slate-100 text-slate-500 text-[11px] font-extrabold grid place-items-center">2</span>
+        <span class="text-[13px] font-bold text-slate-600 whitespace-nowrap">4컷 촬영</span>
+      </div>
+      <span class="h-px flex-1 bg-slate-200 min-w-[12px]"></span>
+      <div class="flex items-center gap-2 shrink-0">
+        <span class="w-[22px] h-[22px] rounded-full bg-slate-100 text-slate-500 text-[11px] font-extrabold grid place-items-center">3</span>
+        <span class="text-[13px] font-bold text-slate-600 whitespace-nowrap">꾸미기</span>
+      </div>
+      <span class="h-px flex-1 bg-slate-200 min-w-[12px]"></span>
+      <div class="flex items-center gap-2 shrink-0">
+        <span class="w-[22px] h-[22px] rounded-full bg-mint-500 text-white text-[11px] font-extrabold grid place-items-center">4</span>
+        <span class="text-[13px] font-bold text-mint-700 whitespace-nowrap">인쇄</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== Main ========== -->
+<main class="max-w-5xl mx-auto px-4 mt-4 grid grid-cols-1 md:grid-cols-5 gap-4">
+
+  <!-- 카메라 -->
+  <section class="md:col-span-3 bg-white shadow-sm rounded-3xl p-5 sm:p-6">
+
+    <div class="relative w-full rounded-2xl overflow-hidden bg-slate-900" style="aspect-ratio:4/3;">
+      <video id="video" class="w-full h-full object-cover mirrored" playsinline autoplay muted></video>
+
+      <div id="camEmpty" class="absolute inset-0 grid place-items-center text-center px-8 bg-slate-800">
+        <div>
+          <div class="text-[44px] mb-2">📸</div>
+          <p class="text-slate-200 font-bold text-[15px]">카메라가 꺼져 있어요</p>
+          <p class="text-slate-400 text-[13px] mt-1">아래 버튼을 눌러 시작해 보세요</p>
+        </div>
+      </div>
+
+      <div id="countWrap" class="absolute inset-0 hidden place-items-center bg-black/25">
+        <div id="countNum" class="text-white font-extrabold" style="font-size:20vw;line-height:1;text-shadow:0 4px 24px rgba(0,0,0,.35)">3</div>
+      </div>
+
+      <div id="flash" class="absolute inset-0 bg-white opacity-0 pointer-events-none"></div>
+
+      <!-- 상단 상태 -->
+      <div class="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
+        <span id="seqTag" class="hidden px-3 py-1.5 rounded-full bg-black/50 backdrop-blur text-white text-[13px] font-bold"></span>
+        <span id="shotBadge" class="ml-auto px-3 py-1.5 rounded-full bg-black/40 backdrop-blur text-white/90 text-[12px] font-bold">0 / 4</span>
+      </div>
+
+      <!-- 카메라 도구 -->
+      <div id="camTools" class="absolute bottom-3 right-3 hidden flex-col gap-2">
+        <button id="btnFlip" class="btn w-10 h-10 rounded-full bg-black/45 backdrop-blur text-white text-[15px] grid place-items-center" title="전/후면 전환">🔄</button>
+        <button id="btnMirror" class="btn w-10 h-10 rounded-full bg-black/45 backdrop-blur text-white text-[15px] grid place-items-center" title="좌우반전">🪞</button>
+      </div>
+    </div>
+
+    <!-- 주 버튼 -->
+    <button id="btnStart" class="btn w-full mt-4 bg-mint-500 hover:bg-mint-600 text-white font-bold py-4 rounded-2xl shadow-sm">카메라 켜기</button>
+    <button id="btnShoot" class="btn w-full mt-4 hidden bg-mint-500 hover:bg-mint-600 text-white font-extrabold py-[18px] rounded-2xl shadow-md text-[17px]">4컷 연속 촬영</button>
+
+    <!-- 타이머 -->
+    <div class="mt-4 flex items-center gap-3">
+      <span class="text-[12px] font-bold text-slate-400 shrink-0">간격</span>
+      <div class="seg flex-1" id="timerSeg">
+        <button data-sec="2">2초</button>
+        <button data-sec="3" class="on">3초</button>
+        <button data-sec="5">5초</button>
+        <button data-sec="8">8초</button>
+      </div>
+    </div>
+
+    <!-- 썸네일 -->
+    <div class="mt-4">
+      <div id="thumbs" class="grid grid-cols-4 gap-2"></div>
+      <div class="flex items-center justify-between gap-3 mt-3">
+        <p class="text-[11px] text-slate-400 leading-snug">컷을 탭하면 그 컷만<br class="sm:hidden" /> 다시 찍어요</p>
+        <button id="btnReset" class="btn shrink-0 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-[13px] px-4 py-2.5 rounded-xl">↺ 처음부터</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 결과 -->
+  <section class="md:col-span-2 bg-white shadow-sm rounded-3xl p-5 sm:p-6 md:sticky md:top-4 self-start">
+
+    <div class="rounded-2xl bg-slate-50 p-4 grid place-items-center" style="min-height:300px;">
+      <canvas id="sheet" class="rounded-xl shadow-md bg-white fade" style="width:100%;max-width:230px;height:auto;"></canvas>
+      <div id="sheetEmpty" class="text-center">
+        <div class="text-[38px] mb-2 opacity-60">🖼️</div>
+        <p class="text-slate-500 text-[13px] font-bold">아직 사진이 없어요</p>
+        <p class="text-slate-400 text-[12px] mt-1">4컷을 찍으면 여기에 나타나요</p>
+      </div>
+    </div>
+    <p class="text-[11px] text-slate-400 text-center mt-2.5">엽서 100×148mm · 같은 줄 2개 · 가운데 자르기</p>
+
+    <!-- 꾸미기 (접힘) -->
+    <button id="btnDeco" class="btn w-full mt-4 flex items-center justify-between px-1 py-2">
+      <span class="text-[13px] font-bold text-slate-700">꾸미기</span>
+      <span id="decoArrow" class="text-slate-400 text-[12px] font-bold">펼치기 ▾</span>
+    </button>
+    <div id="decoPanel" class="hidden space-y-4 pt-1">
+      <div>
+        <p class="text-[12px] font-bold text-slate-400 mb-2 px-1">프레임 색</p>
+        <div id="frameChips" class="grid grid-cols-5 gap-2.5 justify-items-center"></div>
+      </div>
+      <div>
+        <p class="text-[12px] font-bold text-slate-400 mb-2 px-1">사진 느낌</p>
+        <div id="filterChips" class="grid grid-cols-3 gap-2"></div>
+      </div>
+      <div>
+        <input id="caption" maxlength="20" placeholder="오늘네컷 (문구 바꾸기)"
+          class="w-full px-4 py-3 rounded-xl bg-slate-100 text-slate-700 text-[13px] font-semibold outline-none focus:ring-2 focus:ring-mint-300 placeholder:text-slate-400 placeholder:font-medium" />
+        <div class="flex gap-4 mt-2.5 px-1">
+          <label class="flex items-center gap-1.5 text-[12px] text-slate-500 font-semibold"><input id="showDate" type="checkbox" checked class="w-4 h-4 accent-mint-500" />날짜</label>
+          <label class="flex items-center gap-1.5 text-[12px] text-slate-500 font-semibold"><input id="showCut" type="checkbox" checked class="w-4 h-4 accent-mint-500" />자르는 선</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 출력 -->
+    <div class="mt-5">
+      <button id="btnPrint" class="btn w-full bg-mint-500 hover:bg-mint-600 text-white font-extrabold py-[18px] rounded-2xl shadow-md disabled:opacity-35 disabled:shadow-none text-[16px]">인쇄하기</button>
+      <p class="text-[11px] text-slate-400 text-center mt-2 leading-relaxed">창이 열리면 <b class="text-slate-500">SELPHY Photo Layout</b>을 선택하세요<br />아이콘을 길게 눌러 고정하면 다음부터 맨 앞에 떠요</p>
+      <div class="grid grid-cols-2 gap-2 mt-3">
+        <button id="btnSysPrint" class="btn bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl text-[13px] disabled:opacity-35">인쇄 창 열기</button>
+        <button id="btnSave" class="btn bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl text-[13px] disabled:opacity-35">기기에 저장</button>
+      </div>
+      <div class="flex items-center justify-center mt-4">
+        <button id="btnHelp" class="btn text-[12px] font-bold text-mint-600">프린터 연결 방법 보기</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ========== 안심 배지 ========== -->
+<div class="max-w-5xl mx-auto px-4 mt-6">
+  <button id="btnPrivacy" class="btn w-full bg-white shadow-sm rounded-2xl px-5 py-3.5 flex items-center gap-3 text-left hover:shadow-md">
+    <span class="shrink-0 w-9 h-9 rounded-full bg-mint-50 grid place-items-center text-lg">🔒</span>
+    <span class="flex-1 min-w-0">
+      <span class="block text-[13px] font-bold text-slate-800">사진은 이 태블릿 안에서만 처리돼요</span>
+      <span class="block text-[12px] text-slate-500 mt-0.5">서버로 전송되지 않고, 화면을 닫으면 사라집니다</span>
+    </span>
+    <span class="shrink-0 text-[12px] font-bold text-mint-600">자세히</span>
+  </button>
+</div>
+
+<!-- ========== Footer ========== -->
+<footer class="max-w-5xl mx-auto px-4 mt-6 text-center">
+  <p class="text-[13px] font-bold text-slate-500">SchoolKit · 학교에서 바로 쓰는 수업 도구</p>
+  <p class="text-[11px] text-slate-400 mt-1">snackscience@naver.com</p>
+  <p class="text-[11px] text-slate-400 mt-0.5">· ⓒ snackscience. All rights reserved. · v2.0</p>
+</footer>
+
+<!-- ========== Modal: 프라이버시 ========== -->
+<div id="privacyModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 p-4 overflow-y-auto">
+  <div class="max-w-md mx-auto my-10 bg-white rounded-3xl p-7 shadow-xl fade">
+    <div class="text-center">
+      <div class="w-14 h-14 rounded-full bg-mint-50 grid place-items-center text-2xl mx-auto">🔒</div>
+      <h3 class="font-extrabold text-slate-900 text-xl mt-3">사진은 안전합니다</h3>
+      <p class="text-[13px] text-slate-500 mt-1.5">찍은 사진이 인터넷에 올라가지 않아요</p>
+    </div>
+    <div class="mt-6 space-y-3 text-[13px] text-slate-600 leading-relaxed">
+      <div class="bg-slate-50 rounded-2xl p-4">
+        <p class="font-bold text-slate-800 mb-1">① 태블릿 안에서만 합성돼요</p>
+        <p>카메라 영상과 4컷 합성은 모두 이 태블릿의 브라우저 안에서 처리됩니다. 사진을 보내는 기능 자체가 들어 있지 않아요.</p>
+      </div>
+      <div class="bg-slate-50 rounded-2xl p-4">
+        <p class="font-bold text-slate-800 mb-1">② 저장되는 서버가 없어요</p>
+        <p>이 도구는 파일 하나로 된 웹페이지입니다. 사진을 받아 둘 서버나 데이터베이스가 아예 없습니다.</p>
+      </div>
+      <div class="bg-slate-50 rounded-2xl p-4">
+        <p class="font-bold text-slate-800 mb-1">③ 닫으면 사라져요</p>
+        <p>화면을 새로고침하거나 닫으면 찍은 사진은 남지 않습니다. "기기에 저장"을 누른 경우에만 다운로드 폴더에 파일이 생깁니다.</p>
+      </div>
+      <div class="bg-amber-50 rounded-2xl p-4">
+        <p class="font-bold text-amber-800 mb-1">공용 태블릿이라면</p>
+        <p class="text-amber-900/80">인쇄를 위해 셀피 앱으로 보내거나 저장한 파일은 기기에 남을 수 있어요. 행사가 끝나면 다운로드 폴더를 한 번 비워 주세요.</p>
+      </div>
+    </div>
+    <button id="btnClosePrivacy" class="btn w-full mt-6 bg-slate-900 text-white font-bold py-3.5 rounded-2xl">확인했어요</button>
+  </div>
+</div>
+
+<!-- ========== Modal: 인쇄 도움말 ========== -->
+<div id="helpModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 p-4 overflow-y-auto">
+  <div class="max-w-md mx-auto my-10 bg-white rounded-3xl p-7 shadow-xl fade">
+    <h3 class="font-extrabold text-slate-900 text-xl">셀피 CP1300 연결</h3>
+    <p class="text-[13px] text-slate-500 mt-1.5">편한 방법 하나만 골라 쓰세요</p>
+    <div class="mt-5 space-y-3 text-[13px] text-slate-600 leading-relaxed">
+      <div class="bg-mint-50 rounded-2xl p-4">
+        <p class="font-bold text-mint-700 mb-1.5">방법 A · 셀피 앱으로 (가장 안정적)</p>
+        <p>프린터에서 <b>Wi-Fi 설정 → 다이렉트 접속</b>을 켜고, 태블릿 Wi-Fi를 <b>DIRECT-…_Canon</b>에 연결 → <b>인쇄하기</b> 버튼 → Canon SELPHY Photo Layout 선택 → 엽서(P)·테두리없음으로 인쇄</p>
+      </div>
+      <div class="bg-slate-50 rounded-2xl p-4">
+        <p class="font-bold text-slate-800 mb-1.5">방법 B · 프린터에 바로 인쇄</p>
+        <p><b>인쇄 창 열기</b> → 인쇄 창에서 프린터를 <b>Canon SELPHY CP1300</b>, 용지를 <b>100×148mm</b>로 선택. 인쇄 서비스가 안 보이면 Play 스토어에서 <b>Mopria 인쇄 서비스</b>를 설치하세요.</p>
+      </div>
+      <div class="bg-slate-50 rounded-2xl p-4">
+        <p class="font-bold text-slate-800 mb-1.5">메일·메신저로도 보낼 수 있어요</p>
+        <p><b>인쇄하기</b> 버튼을 누르면 열리는 공유창에 Gmail, 네이버메일, 카카오톡도 함께 뜹니다. 원하는 앱을 고르면 사진이 첨부된 채로 열려요. 학생 본인이 직접 보내는 방식이라 안심하고 쓸 수 있습니다.</p>
+      </div>
+      <div class="bg-slate-50 rounded-2xl p-4">
+        <p class="font-bold text-slate-800 mb-1.5">미리 해두면 좋아요</p>
+        <p>행사 전에 한 장만 테스트 인쇄해서 프린터와 용지 설정을 저장해 두면, 이후에는 탭 두 번이면 바로 나갑니다.</p>
+      </div>
+    </div>
+    <button id="btnCloseHelp" class="btn w-full mt-6 bg-slate-900 text-white font-bold py-3.5 rounded-2xl">닫기</button>
+  </div>
+</div>
+
+<!-- 토스트 -->
+<div id="toast" class="fixed left-1/2 -translate-x-1/2 bottom-6 z-[60] hidden max-w-[88%] px-5 py-3.5 rounded-2xl bg-slate-900 text-white text-[13px] font-semibold shadow-xl text-center leading-relaxed"></div>
+
+<div id="printArea"><img id="printImg" alt="오늘네컷" /></div>
+
+<!-- ========== Script ========== -->
+<script>
+/* 인쇄 규격: 엽서 100×148mm @300dpi */
+const SHEET_W=1182, SHEET_H=1748;
+const STRIP_W=SHEET_W/2;
+const PHOTO_W=503, PHOTO_H=377;
+const PAD_X=(STRIP_W-PHOTO_W)/2, TOP=30, GAP=10;
+const CAP_TOP=TOP+PHOTO_H*4+GAP*3;
+
+const S={stream:null,facing:'user',mirror:true,sec:3,shots:[null,null,null,null],busy:false,frame:'#FFFFFF',filter:'none'};
+const FRAMES=[
+  {n:'화이트',v:'#FFFFFF'},
+  {n:'아이보리',v:'#F3EDE3'},
+  {n:'버터',v:'#F8E6A0'},
+  {n:'코튼핑크',v:'#F6C6D4'},
+  {n:'라벤더',v:'#CEC2EC'},
+  {n:'베이비블루',v:'#B6D5EF'},
+  {n:'민트소다',v:'#A6DFD0'},
+  {n:'세이지',v:'#A9B6A5'},
+  {n:'체리',v:'#D33D51'},
+  {n:'차콜',v:'#262626'}
+];
+const FILTERS=[
+  {n:'원본',v:'none'},
+  {n:'화사',v:'brightness(1.10) contrast(1.05) saturate(1.10)'},
+  {n:'따뜻',v:'sepia(0.25) saturate(1.25) brightness(1.05)'},
+  {n:'필름',v:'contrast(1.15) saturate(0.92) sepia(0.12)'},
+  {n:'흑백',v:'grayscale(1) contrast(1.12)'},
+  {n:'선명',v:'contrast(1.25) saturate(1.15)'}
+];
+
+const $=id=>document.getElementById(id);
+const video=$('video'), sheet=$('sheet'), sctx=sheet.getContext('2d');
+sheet.width=SHEET_W; sheet.height=SHEET_H;
+
+/* ----- 옵션 UI ----- */
+$('frameChips').innerHTML=FRAMES.map((f,i)=>`<button data-v="${f.v}" class="fchip swatch ${i===0?'on':''}" style="background:${f.v}" title="${f.n}"></button>`).join('');
+$('filterChips').innerHTML=FILTERS.map((f,i)=>`<button data-v="${f.v}" class="lchip ${i===0?'on':''}">${f.n}</button>`).join('');
+
+document.querySelectorAll('.fchip').forEach(b=>b.onclick=()=>{
+  S.frame=b.dataset.v;
+  document.querySelectorAll('.fchip').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); render();
+});
+document.querySelectorAll('.lchip').forEach(b=>b.onclick=()=>{
+  S.filter=b.dataset.v;
+  document.querySelectorAll('.lchip').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); drawThumbs(); render();
+});
+document.querySelectorAll('#timerSeg button').forEach(b=>b.onclick=()=>{
+  S.sec=+b.dataset.sec;
+  document.querySelectorAll('#timerSeg button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+});
+
+$('btnDeco').onclick=()=>{
+  const p=$('decoPanel'), open=!p.classList.contains('hidden');
+  p.classList.toggle('hidden', open);
+  if(!open) p.classList.add('fade');
+  $('decoArrow').textContent = open ? '펼치기 ▾' : '접기 ▴';
+};
+
+/* ----- 카메라 ----- */
+async function startCam(){
+  try{
+    if(S.stream) S.stream.getTracks().forEach(t=>t.stop());
+    S.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:S.facing,width:{ideal:2560},height:{ideal:1440}},audio:false});
+    video.srcObject=S.stream; await video.play();
+    $('camEmpty').classList.add('hidden');
+    $('btnStart').classList.add('hidden');
+    $('btnShoot').classList.remove('hidden');
+    $('camTools').classList.remove('hidden');
+    $('camTools').classList.add('flex');
+  }catch(e){
+    alert('카메라를 열지 못했어요.\n\n· 주소가 https 인지 확인해 주세요\n· 브라우저 카메라 권한을 허용해 주세요\n\n('+e.name+')');
+  }
+}
+$('btnStart').onclick=startCam;
+$('btnFlip').onclick=()=>{ S.facing=(S.facing==='user')?'environment':'user'; S.mirror=(S.facing==='user'); applyMirror(); if(S.stream) startCam(); };
+$('btnMirror').onclick=()=>{ S.mirror=!S.mirror; applyMirror(); };
+function applyMirror(){
+  video.classList.toggle('mirrored',S.mirror);
+  $('btnMirror').style.background = S.mirror ? 'rgba(16,185,129,.85)' : 'rgba(0,0,0,.45)';
+}
+
+/* ----- 소리 ----- */
+let AC=null;
+function beep(f=880,d=.12){
+  try{
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    const o=AC.createOscillator(),g=AC.createGain();
+    o.frequency.value=f; o.type='sine';
+    g.gain.setValueAtTime(.16,AC.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);
+    o.connect(g); g.connect(AC.destination); o.start(); o.stop(AC.currentTime+d);
+  }catch(e){}
+}
+
+/* ----- 캡처 ----- */
+function grab(){
+  const vw=video.videoWidth, vh=video.videoHeight;
+  if(!vw||!vh) return null;
+  const R=PHOTO_W/PHOTO_H;
+  let sw,sh;
+  if(vw/vh>R){ sh=vh; sw=vh*R; } else { sw=vw; sh=vw/R; }
+  const sx=(vw-sw)/2, sy=(vh-sh)/2;
+  const c=document.createElement('canvas');
+  c.width=PHOTO_W*2; c.height=PHOTO_H*2;
+  const x=c.getContext('2d');
+  if(S.mirror){ x.translate(c.width,0); x.scale(-1,1); }
+  x.drawImage(video,sx,sy,sw,sh,0,0,c.width,c.height);
+  return c;
+}
+
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+async function countdown(sec,label){
+  $('seqTag').textContent=label;
+  $('seqTag').classList.remove('hidden');
+  $('countWrap').classList.remove('hidden'); $('countWrap').classList.add('grid');
+  for(let i=sec;i>0;i--){
+    $('countNum').textContent=i;
+    $('countNum').classList.remove('pop'); void $('countNum').offsetWidth; $('countNum').classList.add('pop');
+    beep(i===1?1320:760,.1);
+    await wait(1000);
+  }
+  $('countWrap').classList.add('hidden'); $('countWrap').classList.remove('grid');
+}
+function doFlash(){
+  const f=$('flash');
+  f.classList.remove('flash'); void f.offsetWidth; f.classList.add('flash');
+  beep(1600,.08);
+}
+
+/* ----- 4컷 촬영 ----- */
+async function shootAll(){
+  if(S.busy||!S.stream) return;
+  S.busy=true; setBusy(true);
+  S.shots=[null,null,null,null]; drawThumbs(); render(); updateBadge();
+  for(let i=0;i<4;i++){
+    await countdown(S.sec,(i+1)+'번째 컷');
+    doFlash();
+    S.shots[i]=grab();
+    drawThumbs(); render(); updateBadge();
+    if(i<3) await wait(900);
+  }
+  $('seqTag').classList.add('hidden');
+  S.busy=false; setBusy(false);
+  beep(1046,.14); await wait(130); beep(1318,.2);
+}
+$('btnShoot').onclick=shootAll;
+
+async function reshoot(i){
+  if(S.busy||!S.stream) return;
+  S.busy=true; setBusy(true);
+  await countdown(S.sec,(i+1)+'번째 컷 다시');
+  doFlash();
+  S.shots[i]=grab();
+  $('seqTag').classList.add('hidden');
+  drawThumbs(); render(); updateBadge();
+  S.busy=false; setBusy(false);
+}
+
+function setBusy(b){
+  ['btnShoot','btnFlip','btnMirror','btnReset'].forEach(id=>$(id).disabled=b);
+  $('btnShoot').classList.toggle('opacity-50',b);
+  $('btnShoot').textContent = b ? '촬영 중…' : (S.shots.filter(Boolean).length===4 ? '다시 4컷 촬영' : '4컷 연속 촬영');
+}
+function updateBadge(){
+  const n=S.shots.filter(Boolean).length;
+  const b=$('shotBadge');
+  b.textContent=n+' / 4';
+  b.className='ml-auto px-3 py-1.5 rounded-full backdrop-blur text-[12px] font-bold '+(n===4?'bg-mint-500/90 text-white':'bg-black/40 text-white/90');
+}
+
+/* ----- 썸네일 ----- */
+function drawThumbs(){
+  const w=$('thumbs'); w.innerHTML='';
+  for(let i=0;i<4;i++){
+    const d=document.createElement('button');
+    d.className='btn relative rounded-xl overflow-hidden bg-slate-100 grid place-items-center';
+    d.style.aspectRatio='4/3';
+    if(S.shots[i]){
+      const img=document.createElement('img');
+      img.src=S.shots[i].toDataURL('image/jpeg',.8);
+      img.className='w-full h-full object-cover';
+      img.style.filter=S.filter;
+      d.appendChild(img);
+    }else{
+      d.innerHTML='<span class="text-slate-300 text-[13px] font-bold">'+(i+1)+'</span>';
+    }
+    d.onclick=()=>reshoot(i);
+    w.appendChild(d);
+  }
+}
+drawThumbs();
+
+/* ----- 시트 렌더 ----- */
+function todayStr(){
+  const d=new Date();
+  return d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0');
+}
+function isDark(hex){
+  const c=hex.replace('#','');
+  const r=parseInt(c.substr(0,2),16),g=parseInt(c.substr(2,2),16),b=parseInt(c.substr(4,2),16);
+  return (r*.299+g*.587+b*.114)<150;
+}
+function tracked(text,cx,y,sp){
+  if('letterSpacing' in sctx){
+    sctx.letterSpacing=sp+'px';
+    sctx.fillText(text,cx-sp/2,y);
+    sctx.letterSpacing='0px';
+    return;
+  }
+  const chars=[...text];
+  let w=-sp;
+  chars.forEach(c=>w+=sctx.measureText(c).width+sp);
+  let x=cx-w/2;
+  sctx.textAlign='left';
+  chars.forEach(c=>{ sctx.fillText(c,x,y); x+=sctx.measureText(c).width+sp; });
+  sctx.textAlign='center';
+}
+
+function render(){
+  const has=S.shots.some(Boolean);
+  $('sheetEmpty').style.display=has?'none':'block';
+  sheet.style.display=has?'block':'none';
+
+  sctx.setTransform(1,0,0,1,0,0);
+  sctx.clearRect(0,0,SHEET_W,SHEET_H);
+  sctx.fillStyle=S.frame;
+  sctx.fillRect(0,0,SHEET_W,SHEET_H);
+
+  for(let s=0;s<2;s++){
+    const ox=s*STRIP_W;
+    for(let i=0;i<4;i++){
+      const y=TOP+i*(PHOTO_H+GAP);
+      if(S.shots[i]){
+        sctx.save(); sctx.filter=S.filter;
+        sctx.drawImage(S.shots[i],ox+PAD_X,y,PHOTO_W,PHOTO_H);
+        sctx.restore();
+      }else{
+        sctx.fillStyle='rgba(148,163,184,.18)';
+        sctx.fillRect(ox+PAD_X,y,PHOTO_W,PHOTO_H);
+      }
+    }
+    const dark=isDark(S.frame);
+    const title=$('caption').value.trim()||'오늘네컷';
+    const cx=ox+STRIP_W/2;
+    sctx.textAlign='center';
+
+    sctx.fillStyle=dark?'#FFFFFF':'#242424';
+    sctx.font='800 42px Pretendard, sans-serif';
+    sctx.fillText(title,cx,CAP_TOP+60);
+
+    sctx.fillStyle=dark?'rgba(255,255,255,.60)':'rgba(36,36,36,.42)';
+    sctx.font='700 19px Pretendard, sans-serif';
+    tracked('TODAY 4 CUTS',cx,CAP_TOP+97,7);
+
+    if($('showDate').checked){
+      sctx.fillStyle=dark?'rgba(255,255,255,.52)':'rgba(36,36,36,.36)';
+      sctx.font='600 26px Pretendard, sans-serif';
+      tracked(todayStr(),cx,CAP_TOP+143,2);
+    }
+  }
+
+  if($('showCut').checked){
+    sctx.save();
+    sctx.strokeStyle=isDark(S.frame)?'rgba(255,255,255,.42)':'rgba(100,116,139,.42)';
+    sctx.lineWidth=2; sctx.setLineDash([14,12]);
+    sctx.beginPath(); sctx.moveTo(STRIP_W,12); sctx.lineTo(STRIP_W,SHEET_H-12); sctx.stroke();
+    sctx.restore();
+  }
+
+  const ready=S.shots.filter(Boolean).length===4;
+  ['btnPrint','btnSysPrint','btnSave'].forEach(id=>$(id).disabled=!ready);
+}
+render();
+$('caption').addEventListener('input',render);
+['showDate','showCut'].forEach(id=>$(id).addEventListener('change',render));
+
+/* ----- 출력 ----- */
+function fileName(){
+  const cap=$('caption').value.trim().replace(/[\\/:*?"<>|]/g,'');
+  return '오늘네컷_'+(cap?cap+'_':'')+todayStr().replace(/\./g,'')+'.jpg';
+}
+$('btnSave').onclick=()=>{
+  try{
+    const a=document.createElement('a');
+    a.href=sheet.toDataURL('image/jpeg',.95); a.download=fileName();
+    document.body.appendChild(a); a.click(); a.remove();
+    toast('사진을 저장했어요. 앨범에서 확인하세요.',2600);
+  }catch(e){
+    toast('저장하지 못했어요. 사진을 길게 눌러 저장해 보세요.');
+  }
+};
+let toastT=null;
+function toast(msg,ms=3800){
+  const t=$('toast');
+  t.innerHTML=msg;
+  t.classList.remove('hidden');
+  clearTimeout(toastT);
+  toastT=setTimeout(()=>t.classList.add('hidden'),ms);
+}
+
+function inFrame(){ try{ return window.self!==window.top; }catch(e){ return true; } }
+
+/* 보조: 시스템 인쇄 창 */
+function sysPrint(){
+  if(inFrame()){
+    toast('미리보기 화면에서는 인쇄가 막혀 있어요.<br>주소창에 직접 열어서 사용해 주세요.');
+    return false;
+  }
+  try{
+    $('printImg').src=sheet.toDataURL('image/jpeg',.95);
+    setTimeout(()=>window.print(),350);
+    return true;
+  }catch(e){
+    toast('인쇄 창을 열 수 없어요. "기기에 저장" 후 앨범에서 인쇄해 주세요.');
+    return false;
+  }
+}
+$('btnSysPrint').onclick=sysPrint;
+
+/* 주 버튼: 셀피 앱으로 넘기기 (공유창 → SELPHY 선택) */
+$('btnPrint').onclick=async()=>{
+  let file;
+  try{
+    const blob=await new Promise(r=>sheet.toBlob(r,'image/jpeg',.95));
+    file=new File([blob],fileName(),{type:'image/jpeg'});
+  }catch(e){
+    toast('사진을 만드는 중 문제가 생겼어요. 다시 촬영해 주세요.');
+    return;
+  }
+
+  const canShare = navigator.canShare && navigator.canShare({files:[file]});
+
+  if(!canShare){
+    if(inFrame()){
+      toast('미리보기 화면에서는 앱 연결이 막혀 있어요.<br>태블릿 브라우저에서 주소로 직접 열어 주세요.');
+      return;
+    }
+    if(!window.isSecureContext){
+      toast('https 주소에서만 앱 연결이 됩니다.');
+      return;
+    }
+    toast('이 브라우저는 앱 공유를 지원하지 않아요.<br>인쇄 창을 대신 열게요.');
+    setTimeout(sysPrint,900);
+    return;
+  }
+
+  try{
+    await navigator.share({files:[file],title:'오늘네컷',text:'오늘네컷'});
+  }catch(e){
+    if(e && e.name==='AbortError') return;          // 사용자가 그냥 닫음
+    toast('앱으로 보내지 못했어요.<br>"기기에 저장" 후 셀피 앱에서 불러와 주세요.');
+  }
+};
+$('btnReset').onclick=()=>{
+  S.shots=[null,null,null,null];
+  $('btnShoot').textContent='4컷 연속 촬영';
+  drawThumbs(); render(); updateBadge();
+};
+
+/* ----- 모달 ----- */
+function modal(id,open){ $(id).classList.toggle('hidden',!open); }
+$('btnPrivacy').onclick=()=>modal('privacyModal',true);
+$('btnClosePrivacy').onclick=()=>modal('privacyModal',false);
+$('privacyModal').onclick=e=>{ if(e.target.id==='privacyModal') modal('privacyModal',false); };
+$('btnHelp').onclick=()=>modal('helpModal',true);
+$('btnCloseHelp').onclick=()=>modal('helpModal',false);
+$('helpModal').onclick=e=>{ if(e.target.id==='helpModal') modal('helpModal',false); };
+
+applyMirror(); updateBadge();
+window.addEventListener('beforeunload',()=>{ if(S.stream) S.stream.getTracks().forEach(t=>t.stop()); });
+</script>
+</body>
+</html>
